@@ -1,8 +1,8 @@
-# CLAUDE.md — PDF to Markdown Converter
+# CLAUDE.md — MarkItDown Universal Converter
 
 ## Contexto del proyecto
 
-Herramienta CLI en Python para convertir archivos PDF a Markdown usando **MarkItDown de Microsoft** (`microsoft/markitdown`). Desarrollada en el contexto académico de la materia Diseño de Software (Iberoamericana).
+Herramienta CLI en Python que pre-procesa documentos a Markdown usando **MarkItDown oficial de Microsoft** (`microsoft/markitdown`), antes de enviarlos a un LLM. Soporta PDF, DOCX, PPTX, XLSX, HTML, imágenes y más. El objetivo es reducir tokens y costo de procesamiento.
 
 El proyecto usa **uv (Astral)** como gestor de paquetes y entornos virtuales.
 
@@ -10,25 +10,25 @@ El proyecto usa **uv (Astral)** como gestor de paquetes y entornos virtuales.
 
 ## Cómo ejecutar
 
-Siempre ejecutar desde la carpeta `pdf-converter/` usando `uv run`:
+Siempre desde la carpeta `pdf-converter/` usando `uv run`:
 
 ```bash
-uv run python convert_pdf.py <pdf_path> [destiny_path]
+uv run python convert_to_md.py <input_path> [destiny_path]
 ```
 
-**Nunca** usar `python` directamente — se debe usar `uv run` para que tome el entorno `.venv` gestionado por uv.
+**Nunca** usar `python` directamente — se debe usar `uv run` para respetar el `.venv` gestionado por uv.
 
 ---
 
 ## Archivos del proyecto
 
-| Archivo           | Propósito |
-|-------------------|-----------|
-| `convert_pdf.py`  | Script principal. Acepta `pdf_path` y `destiny_path` por `sys.argv`. |
-| `pyproject.toml`  | Definición del proyecto para uv. Contiene dependencias y versión de Python. |
-| `uv.lock`         | Lock file con versiones exactas de todas las dependencias. No editar manualmente. |
-| `requirements.txt`| Referencia de dependencias en formato pip (secundario, uv usa pyproject.toml). |
-| `.venv/`          | Entorno virtual generado por `uv sync`. No commitear. |
+| Archivo            | Propósito |
+|--------------------|-----------|
+| `convert_to_md.py` | Script principal. Acepta `input_path` y `destiny_path` por `sys.argv`. |
+| `pyproject.toml`   | Definición del proyecto para uv. Contiene dependencias y versión de Python. |
+| `uv.lock`          | Lock file con versiones exactas. No editar manualmente. |
+| `requirements.txt` | Referencia de dependencias en formato pip (secundario). |
+| `.venv/`           | Entorno virtual generado por `uv sync`. No commitear. |
 
 ---
 
@@ -38,13 +38,12 @@ uv run python convert_pdf.py <pdf_path> [destiny_path]
 from markitdown import MarkItDown
 
 converter = MarkItDown()
-result = converter.convert("ruta/al/archivo.pdf")
-markdown_text = result.text_content  # str con el contenido Markdown
+result = converter.convert("ruta/al/archivo")  # cualquier formato soportado
+markdown_text = result.text_content            # str con el contenido Markdown
 ```
 
-- `MarkItDown()` — instancia sin argumentos
-- `.convert(path: str)` — retorna un objeto con atributo `.text_content`
-- El paquete correcto es `markitdown[all]` (incluye soporte para PDF, DOCX, imágenes, etc.)
+- No se valida la extensión — MarkItDown detecta el formato internamente
+- El paquete correcto es `markitdown[all]` (incluye todos los extras)
 
 ---
 
@@ -52,8 +51,9 @@ markdown_text = result.text_content  # str con el contenido Markdown
 
 - **Codificación:** se fuerza UTF-8 en stdout para Windows (`sys.stdout = io.TextIOWrapper(...)`)
 - **Python mínimo:** 3.10 (requerido por `markitdown`)
-- **destiny_path:** puede ser directorio o ruta `.md`; si el directorio no existe, se crea con `mkdir(parents=True)`
-- **Salida:** siempre escrita en UTF-8 (`open(..., encoding='utf-8')`)
+- **destiny_path:** puede ser directorio o ruta `.md`; se crea con `mkdir(parents=True)` si no existe
+- **Sin validación de extensión:** MarkItDown maneja internamente los formatos; el script no restringe tipos
+- **Salida:** siempre escrita en UTF-8
 
 ---
 
@@ -63,12 +63,12 @@ markdown_text = result.text_content  # str con el contenido Markdown
 # Instalar dependencias
 uv sync
 
-# Ejecutar conversión
-uv run python convert_pdf.py "..\mi_archivo.pdf"
-uv run python convert_pdf.py "..\mi_archivo.pdf" "..\salida"
+# Convertir cualquier documento
+uv run python convert_to_md.py "ruta/al/archivo.pdf"
+uv run python convert_to_md.py "ruta/al/archivo.docx" "ruta/destino"
 
 # Ver ayuda
-uv run python convert_pdf.py --help
+uv run python convert_to_md.py --help
 
 # Agregar nueva dependencia
 uv add <paquete>

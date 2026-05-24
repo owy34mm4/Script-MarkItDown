@@ -1,6 +1,19 @@
-# PDF to Markdown Converter
+# MarkItDown Universal Converter
 
-Convierte archivos PDF a Markdown usando **[MarkItDown](https://github.com/microsoft/markitdown)**, la herramienta oficial de Microsoft para conversión de documentos.
+Pre-procesa documentos a Markdown usando **[MarkItDown](https://github.com/microsoft/markitdown)**, la herramienta oficial de Microsoft, antes de enviarlos a un LLM — ahorrando tokens y reduciendo costo de procesamiento.
+
+---
+
+## Formatos soportados
+
+| Categoría    | Formatos                              |
+|--------------|---------------------------------------|
+| Documentos   | PDF, DOCX, PPTX, XLSX, ODT            |
+| Web          | HTML, XML                             |
+| Datos        | CSV, JSON                             |
+| Imágenes     | JPG, PNG, GIF, BMP, TIFF (OCR/desc.)  |
+| Audio        | MP3, WAV (transcripción)              |
+| Otros        | ZIP, EPUB y más                       |
 
 ---
 
@@ -22,26 +35,26 @@ Convierte archivos PDF a Markdown usando **[MarkItDown](https://github.com/micro
 uv sync
 ```
 
-Esto crea el entorno virtual `.venv` e instala todas las dependencias automáticamente.
+Crea el entorno virtual `.venv` e instala todas las dependencias automáticamente.
 
 ---
 
 ## Uso
 
 ```
-uv run python convert_pdf.py <pdf_path> [destiny_path]
+uv run python convert_to_md.py <input_path> [destiny_path]
 ```
 
 ### Argumentos
 
 | Argumento      | Requerido | Descripción |
 |----------------|-----------|-------------|
-| `pdf_path`     | Sí        | Ruta completa al archivo PDF a convertir |
-| `destiny_path` | No        | Ruta de destino para el `.md` generado   |
+| `input_path`   | Sí        | Ruta al archivo a convertir |
+| `destiny_path` | No        | Ruta de destino para el `.md` generado |
 
 **Comportamiento de `destiny_path`:**
-- **Omitido** → el `.md` se guarda en el mismo directorio del PDF
-- **Directorio** → el `.md` se guarda dentro con el mismo nombre del PDF
+- **Omitido** → el `.md` se guarda en el mismo directorio del input
+- **Directorio** → el `.md` se guarda dentro con el mismo nombre del input
 - **Ruta `.md`** → usa ese nombre y ruta exactos
 
 ---
@@ -49,17 +62,31 @@ uv run python convert_pdf.py <pdf_path> [destiny_path]
 ## Ejemplos
 
 ```bash
-# Guardar el .md en la misma carpeta del PDF
-uv run python convert_pdf.py "C:\docs\informe.pdf"
+# PDF → mismo directorio
+uv run python convert_to_md.py "C:\docs\informe.pdf"
 
-# Guardar el .md en un directorio distinto
-uv run python convert_pdf.py "C:\docs\informe.pdf" "C:\output"
+# DOCX → directorio distinto
+uv run python convert_to_md.py "C:\docs\reporte.docx" "C:\output"
 
-# Guardar el .md con nombre personalizado
-uv run python convert_pdf.py "C:\docs\informe.pdf" "C:\output\informe_convertido.md"
+# PPTX → nombre personalizado
+uv run python convert_to_md.py "C:\docs\slides.pptx" "C:\output\slides_converted.md"
 
 # Ver ayuda
-uv run python convert_pdf.py --help
+uv run python convert_to_md.py --help
+```
+
+---
+
+## Flujo típico como pre-procesador LLM
+
+```
+documento (PDF/DOCX/PPTX...)
+        ↓
+convert_to_md.py
+        ↓
+archivo.md (texto limpio, sin ruido binario)
+        ↓
+LLM (menos tokens, menor costo)
 ```
 
 ---
@@ -68,7 +95,7 @@ uv run python convert_pdf.py --help
 
 ```
 pdf-converter/
-├── convert_pdf.py    # Script principal de conversión
+├── convert_to_md.py  # Script principal de conversión
 ├── pyproject.toml    # Configuración del proyecto y dependencias (uv)
 ├── requirements.txt  # Lista de dependencias (referencia)
 ├── uv.lock           # Lock file de uv (versiones exactas)
@@ -81,13 +108,5 @@ pdf-converter/
 
 ## Dependencias principales
 
-- [`markitdown[all]`](https://github.com/microsoft/markitdown) — Microsoft MarkItDown (conversión de documentos)
+- [`markitdown[all]`](https://github.com/microsoft/markitdown) — Microsoft MarkItDown
 - [`pillow`](https://pillow.readthedocs.io/) — Procesamiento de imágenes
-
----
-
-## Notas
-
-- El archivo `.md` resultante se guarda en **UTF-8**.
-- Compatible con Windows, macOS y Linux.
-- Si el `destiny_path` no existe como directorio, se crea automáticamente.
